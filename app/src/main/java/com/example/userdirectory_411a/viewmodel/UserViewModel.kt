@@ -18,6 +18,9 @@ class UserViewModel(private val repository: UserRepository): ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
     private fun loadUsers() {
         viewModelScope.launch {
             repository.getAllUsers().collect { userList ->
@@ -27,12 +30,32 @@ class UserViewModel(private val repository: UserRepository): ViewModel() {
         }
     }
 
+
     private fun fetchUsers() {
         viewModelScope.launch {
             _isLoading.value = true
             repository.fetchAndStoreUsers()
             _isLoading.value = false
         }
+    }
+
+    private fun searchUsers(query: String) {
+        viewModelScope.launch {
+            if (query.isEmpty()) {
+                repository.getAllUsers().collect { userList ->
+                    _users.value = userList
+                }
+            } else {
+                repository.searchUsers(query).collect { userList ->
+                    _users.value = userList
+                }
+            }
+        }
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _searchQuery.value = query
+        searchUsers(query)
     }
 
 

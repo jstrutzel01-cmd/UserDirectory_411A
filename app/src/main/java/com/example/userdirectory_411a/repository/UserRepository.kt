@@ -10,6 +10,10 @@ class UserRepository(private val userDao: UserDao) {
         return userDao.getAllUsers()
     }
 
+    fun searchUsers(query: String): Flow<List<User>> {
+        return userDao.searchUsers(query)
+    }
+
     suspend fun fetchAndStoreUsers() {
         try {
             val users = RetrofitInstance.api.getUsers()
